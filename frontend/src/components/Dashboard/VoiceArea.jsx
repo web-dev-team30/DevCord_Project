@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const VoiceArea = ({ activeChannel, user, socket }) => {
+const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
     const localVideoRef = useRef(null);
     const [peers, setPeers] = useState({}); // { userId: { name, stream, isVideoOff, isMuted, avatar } }
     const peerConnections = useRef({}); // Store RTCPeerConnection instances

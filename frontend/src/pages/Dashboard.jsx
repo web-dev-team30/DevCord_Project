@@ -106,6 +106,7 @@ const Dashboard = () => {
                                 activeChannel={activeChannel}
                                 user={user}
                                 socket={socket}
+                                onLeave={() => setActiveChannel(null)}
                             />
                         ) : (
                             <ChatArea

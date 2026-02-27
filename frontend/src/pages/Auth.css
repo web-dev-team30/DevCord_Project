@@ -1,0 +1,120 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #313338;
+    /* Discord dark theme background */
+    background-image: url('https://theme.zdassets.com/theme_assets/678183/b7e9dce75f9edb23504e13b4699e208f28dacb29.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.auth-box {
+    background-color: #313338;
+    width: 480px;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+    color: #dbdee1;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-header h2 {
+    color: #f2f3f5;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.auth-header p {
+    color: #b5bac1;
+    font-size: 16px;
+}
+
+.auth-error {
+    background-color: #f23f43;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    color: #b5bac1;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.form-group input {
+    background-color: #1e1f22;
+    border: none;
+    border-radius: 4px;
+    color: #dbdee1;
+    padding: 10px;
+    font-size: 16px;
+    outline: none;
+    transition: background-color 0.2s;
+}
+
+.form-group input:focus {
+    background-color: #2b2d31;
+}
+
+.auth-btn {
+    background-color: #5865f2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+
+.auth-btn:hover {
+    background-color: #4752c4;
+}
+
+.auth-btn:disabled {
+    background-color: #4752c4;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.auth-footer {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #b5bac1;
+}
+
+.auth-link {
+    color: #00a8fc;
+    text-decoration: none;
+    transition: text-decoration 0.2s;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}

@@ -23,7 +23,12 @@ const app = express();
 const server = http.createServer(app);
 
 // Socket.io setup
-const frontendOrigins = [process.env.FRONTEND_URL, "http://localhost:5173", "http://localhost:5174"].filter(Boolean);
+const frontendOrigins = [
+    process.env.FRONTEND_URL,
+    "https://dev-cord-project.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174"
+].filter(Boolean);
 
 const io = new Server(server, {
     cors: {

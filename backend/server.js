@@ -36,9 +36,25 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(cookieParser());
 
+// Normalize origins (remove trailing slashes)
+const normalizedOrigins = frontendOrigins.map(origin =>
+    origin.endsWith('/') ? origin.slice(0, -1) : origin
+);
+
 app.use(cors({
-    origin: frontendOrigins,
-    credentials: true
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (normalizedOrigins.indexOf(origin) !== -1 || normalizedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log("CORS blocked for origin:", origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 
 // Serve Static Files

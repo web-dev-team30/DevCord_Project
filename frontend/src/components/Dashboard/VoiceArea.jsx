@@ -300,7 +300,7 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
                 >
                     {isVideoOff ? '🚫' : '📷'}
                 </button>
-                <button style={{ width: '56px', height: '56px', borderRadius: '28px', border: 'none', backgroundColor: '#ed4245', color: '#ffffff', fontSize: '24px', cursor: 'pointer' }} onClick={() => window.location.reload()}>
+                <button style={{ width: '56px', height: '56px', borderRadius: '28px', border: 'none', backgroundColor: '#ed4245', color: '#ffffff', fontSize: '24px', cursor: 'pointer' }} onClick={onLeave}>
                     📞
                 </button>
             </div>

@@ -908,4 +908,160 @@
 .share-code-btn:disabled {
     background-color: #4f545c;
     cursor: not-allowed;
-}
+}
+
+/* ---------- Attachment Action Menu & File Cards ---------- */
+.attach-dropdown-menu {
+    position: absolute;
+    bottom: 50px;
+    left: 0;
+    width: 240px;
+    background-color: #2b2d31;
+    border: 1px solid #1e1f22;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    padding: 6px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.attach-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: #dbdee1;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+.attach-menu-item:hover {
+    background-color: #35373c;
+    color: white;
+}
+
+.attach-menu-item .item-icon {
+    font-size: 20px;
+}
+
+.attach-menu-item .item-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.attach-menu-item .item-text strong {
+    font-size: 13px;
+    color: #f2f3f5;
+}
+
+.attach-menu-item .item-text small {
+    font-size: 11px;
+    color: #949ba4;
+}
+
+.upload-progress-banner {
+    background-color: #2b2d31;
+    color: #5865f2;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+    border: 1px dashed #5865f2;
+}
+
+.message-attachments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+    max-width: 500px;
+}
+
+.attachment-image-card {
+    border-radius: 6px;
+    overflow: hidden;
+    max-width: 400px;
+    max-height: 300px;
+    background-color: #1e1f22;
+}
+
+.attachment-img-preview {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.attachment-img-preview:hover {
+    transform: scale(1.01);
+}
+
+.attachment-file-card {
+    display: flex;
+    align-items: center;
+    background-color: #2b2d31;
+    border: 1px solid #1e1f22;
+    border-radius: 6px;
+    padding: 10px 14px;
+    gap: 12px;
+    max-width: 420px;
+}
+
+.file-icon-box {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.file-details-box {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.file-name-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #00a8fc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-size-text {
+    font-size: 12px;
+    color: #949ba4;
+}
+
+.download-attachment-btn {
+    background-color: #383a40;
+    color: #f2f3f5;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+
+.download-attachment-btn:hover {
+    background-color: #5865f2;
+    color: white;
+}
+

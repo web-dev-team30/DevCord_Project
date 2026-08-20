@@ -11,6 +11,12 @@ const messageSchema = new mongoose.Schema({
         language: { type: String, default: "javascript" },
         filename: { type: String, default: "snippet" }
     },
+    attachments: [{
+        url: { type: String, required: true },
+        filename: { type: String },
+        mimetype: { type: String },
+        size: { type: Number }
+    }],
     sender: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"

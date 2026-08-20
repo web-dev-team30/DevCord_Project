@@ -184,7 +184,8 @@ DevCord_Project/
 
 ### Profile & Uploads (`/api/users` & `/api/upload`)
 - `PUT /api/users/profile`: Update user profile details.
-- `POST /api/upload`: Upload media/avatar files via Multer.
+- `POST /api/upload/avatar`: Upload avatar image files via Multer (`uploads/avatars/`).
+- `POST /api/upload/file`: Upload general message file attachments via Multer (`uploads/attachments/`).
 
 ---
 

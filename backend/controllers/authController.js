@@ -15,6 +15,13 @@ export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
+        if (!password || password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        }
+        if (password.length > 72) {
+            return res.status(400).json({ message: "Password cannot exceed 72 characters" });
+        }
+
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({ message: "User already exists" });
@@ -108,6 +115,10 @@ export const resetPassword = async (req, res) => {
     try {
         const { token } = req.params;
         const { password } = req.body;
+
+        if (!password || password.length < 6 || password.length > 72) {
+            return res.status(400).json({ message: "Password must be between 6 and 72 characters long" });
+        }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 

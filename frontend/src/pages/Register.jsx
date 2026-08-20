@@ -16,6 +16,17 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long.');
+            return;
+        }
+
+        if (password.length > 72) {
+            setError('Password cannot exceed 72 characters.');
+            return;
+        }
+
         setLoading(true);
 
         const result = await register(name, email, password);
@@ -57,12 +68,15 @@ const Register = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <label>PASSWORD</label>
+                        <label>PASSWORD <span style={{ fontSize: '11px', color: '#949ba4', textTransform: 'none' }}>(6 - 72 characters)</span></label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            minLength={6}
+                            maxLength={72}
                             required
+                            placeholder="Min 6 characters"
                         />
                     </div>
                     <button type="submit" className="auth-btn" disabled={loading}>

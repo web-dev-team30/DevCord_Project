@@ -27,11 +27,10 @@ export const updateUserProfile = async (req, res) => {
             user.name = req.body.name || user.name;
             user.email = req.body.email || user.email;
 
-            // Optional: if allowing password updates
             if (req.body.password) {
-                // Must be hashed inside the schema pre-save or here (using bcrypt)
-                // Since this uses the authController bcrypt logic we'll assume 
-                // schema pre-save does NOT hash automatically in this app yet.
+                if (req.body.password.length < 6 || req.body.password.length > 72) {
+                    return res.status(400).json({ message: "Password must be between 6 and 72 characters long" });
+                }
                 const bcrypt = await import('bcrypt');
                 user.password = await bcrypt.hash(req.body.password, 10);
             }

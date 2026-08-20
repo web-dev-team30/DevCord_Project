@@ -176,12 +176,14 @@ const UserSettings = ({ onClose }) => {
                             </div>
 
                             <div className="form-group">
-                                <label>NEW PASSWORD (Optional)</label>
+                                <label>NEW PASSWORD (Optional - 6 to 72 chars)</label>
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Leave blank to keep current password"
+                                    minLength={6}
+                                    maxLength={72}
+                                    placeholder="Leave blank to keep current password (min 6 chars)"
                                 />
                             </div>
 

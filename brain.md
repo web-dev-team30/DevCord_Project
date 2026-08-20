@@ -107,7 +107,7 @@ DevCord_Project/
 ### 1. User (`User.js`)
 - `name`: String (Required)
 - `email`: String (Required, Unique, Lowercase)
-- `password`: String (Hashed via bcrypt)
+- `password`: String (Hashed via bcrypt, Enforced 6 - 72 characters length limit)
 - `avatar`: String (URL path to uploaded image)
 - `createdAt` / `updatedAt`: Timestamps
 

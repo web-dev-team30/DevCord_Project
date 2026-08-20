@@ -15,13 +15,26 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
     useEffect(() => {
         const startMedia = async () => {
             try {
-                // Try to get both video and audio first
+                // Try to get both video and audio with audio enhancements (echo cancellation & noise suppression)
                 let stream;
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
                 } catch (e) {
-                    console.log("Video access failed, trying audio only...", e);
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    console.log("Video access failed, trying audio only with enhancements...", e);
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
                     setIsVideoOff(true);
                 }
 
@@ -41,20 +54,21 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
 
             } catch (error) {
                 console.error("Error accessing media devices.", error);
-                alert("Could not access microphone. Please check your browser permissions.");
+                alert("Could not access microphone or camera. Please check your browser permissions.");
             }
         };
 
         startMedia();
 
         socket.on('user-connected', async ({ userId, userName, avatar, isVideoOff: remoteVideoOff, isMuted: remoteMuted }) => {
-            console.log('User connected', userId);
+            console.log('User connected to voice:', userId);
             const peerConnection = createPeerConnection(userId, userName, avatar, remoteVideoOff, remoteMuted);
 
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
 
             socket.emit('webrtc-offer', {
+                channelId: activeChannel._id,
                 target: userId,
                 caller: user.id,
                 callerName: user.name,
@@ -63,7 +77,7 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
             });
         });
 
-        socket.on('webrtc-offer', async ({ target, caller, callerName, callerAvatar, sdp }) => {
+        socket.on('webrtc-offer', async ({ channelId, target, caller, callerName, callerAvatar, sdp }) => {
             if (target !== user.id) return;
 
             console.log('Received offer from', caller);
@@ -74,6 +88,7 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
             await peerConnection.setLocalDescription(answer);
 
             socket.emit('webrtc-answer', {
+                channelId: activeChannel._id,
                 target: caller,
                 responder: user.id,
                 sdp: answer
@@ -94,7 +109,11 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
 
             const peerConnection = peerConnections.current[sender];
             if (peerConnection && candidate) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                try {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                } catch (e) {
+                    console.error("Error adding ICE candidate:", e);
+                }
             }
         });
 
@@ -154,7 +173,10 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
         const peerConnection = new RTCPeerConnection({
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' }
             ]
         });
 
@@ -167,11 +189,12 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
         }
 
         peerConnection.ontrack = (event) => {
+            const remoteStream = event.streams[0] || new MediaStream([event.track]);
             setPeers(prev => ({
                 ...prev,
                 [peerId]: {
                     ...prev[peerId],
-                    stream: event.streams[0],
+                    stream: remoteStream,
                     name: peerName,
                     avatar,
                     isVideoOff,
@@ -183,6 +206,7 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
                 socket.emit('webrtc-ice-candidate', {
+                    channelId: activeChannel._id,
                     target: peerId,
                     sender: user.id,
                     candidate: event.candidate
@@ -210,14 +234,12 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
 
         let videoTracks = localStream.current.getVideoTracks();
 
-        // If no video track exists (e.g., initial permission was audio-only), request camera
         if (videoTracks.length === 0) {
             try {
                 const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const newVideoTrack = cameraStream.getVideoTracks()[0];
                 localStream.current.addTrack(newVideoTrack);
 
-                // Add new video track to existing peer connections
                 Object.values(peerConnections.current).forEach(pc => {
                     pc.addTrack(newVideoTrack, localStream.current);
                 });
@@ -236,7 +258,6 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
         const isNowOff = !nextEnabledState;
         setIsVideoOff(isNowOff);
 
-        // Ensure video element srcObject is attached when turning video back ON
         if (!isNowOff && localVideoRef.current) {
             localVideoRef.current.srcObject = localStream.current;
         }
@@ -253,6 +274,23 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
                     VOICE CONNECTED
                 </div>
             </div>
+
+            {/* Dedicated Hidden Audio elements for Remote Peers to guarantee audio playback */}
+            {Object.entries(peers).map(([peerId, peerData]) => (
+                peerData.stream && (
+                    <audio
+                        key={`audio-${peerId}`}
+                        autoPlay
+                        playsInline
+                        ref={el => {
+                            if (el && el.srcObject !== peerData.stream) {
+                                el.srcObject = peerData.stream;
+                                el.play().catch(err => console.log('Remote audio play warning:', err));
+                            }
+                        }}
+                    />
+                )
+            ))}
 
             <div className="video-grid" style={{
                 flex: 1,
@@ -323,7 +361,12 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
                         <video
                             autoPlay
                             playsInline
-                            ref={el => { if (el && peerData.stream) el.srcObject = peerData.stream }}
+                            ref={el => {
+                                if (el && peerData.stream && el.srcObject !== peerData.stream) {
+                                    el.srcObject = peerData.stream;
+                                    el.play().catch(err => console.log('Remote video play warning:', err));
+                                }
+                            }}
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: peerData.isVideoOff ? 'none' : 'block' }}
                         />
                         <div style={{ position: 'absolute', bottom: '12px', left: '12px', backgroundColor: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: '4px', color: 'white', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', zIndex: 3 }}>

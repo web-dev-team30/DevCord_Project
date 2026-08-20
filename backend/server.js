@@ -112,18 +112,18 @@ io.on("connection", (socket) => {
     });
 
     socket.on("webrtc-offer", (data) => {
-        // Find the target socket using io.sockets and emit to them
-        // In a real app we'd map userId -> socketId, but for now we broadcast in the channel
-        // and let the client filter by target ID for simplicity.
-        socket.to(socket.channelId).emit("webrtc-offer", data);
+        const room = data.channelId || socket.channelId;
+        if (room) socket.to(room).emit("webrtc-offer", data);
     });
 
     socket.on("webrtc-answer", (data) => {
-        socket.to(socket.channelId).emit("webrtc-answer", data);
+        const room = data.channelId || socket.channelId;
+        if (room) socket.to(room).emit("webrtc-answer", data);
     });
 
     socket.on("webrtc-ice-candidate", (data) => {
-        socket.to(socket.channelId).emit("webrtc-ice-candidate", data);
+        const room = data.channelId || socket.channelId;
+        if (room) socket.to(room).emit("webrtc-ice-candidate", data);
     });
 
     socket.on("leave-voice", ({ channelId, userId }) => {

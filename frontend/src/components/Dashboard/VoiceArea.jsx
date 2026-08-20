@@ -15,7 +15,7 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
     useEffect(() => {
         const startMedia = async () => {
             try {
-                // Try to get both first
+                // Try to get both video and audio first
                 let stream;
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -64,7 +64,7 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
         });
 
         socket.on('webrtc-offer', async ({ target, caller, callerName, callerAvatar, sdp }) => {
-            if (target !== user.id) return; // Ignore if not for me
+            if (target !== user.id) return;
 
             console.log('Received offer from', caller);
             const peerConnection = createPeerConnection(caller, callerName, callerAvatar);
@@ -81,7 +81,7 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
         });
 
         socket.on('webrtc-answer', async ({ target, responder, sdp }) => {
-            if (target !== user.id) return; // Ignore if not for me
+            if (target !== user.id) return;
 
             const peerConnection = peerConnections.current[responder];
             if (peerConnection) {
@@ -90,7 +90,7 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
         });
 
         socket.on('webrtc-ice-candidate', async ({ target, sender, candidate }) => {
-            if (target !== user.id) return; // Ignore if not for me
+            if (target !== user.id) return;
 
             const peerConnection = peerConnections.current[sender];
             if (peerConnection && candidate) {
@@ -142,6 +142,13 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
             setPeers({});
         };
     }, [activeChannel, socket, user]);
+
+    // Ensure local video element stays connected to stream when toggled back on
+    useEffect(() => {
+        if (!isVideoOff && localVideoRef.current && localStream.current) {
+            localVideoRef.current.srcObject = localStream.current;
+        }
+    }, [isVideoOff]);
 
     const createPeerConnection = (peerId, peerName, avatar, isVideoOff = false, isMuted = false) => {
         const peerConnection = new RTCPeerConnection({
@@ -198,16 +205,43 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
         }
     };
 
-    const toggleVideo = () => {
-        if (localStream.current) {
-            const videoTracks = localStream.current.getVideoTracks();
-            if (videoTracks.length > 0) {
-                const newState = !videoTracks[0].enabled;
-                videoTracks[0].enabled = newState;
-                setIsVideoOff(!newState);
-                socket.emit('toggle-camera', { channelId: activeChannel._id, userId: user.id, isVideoOff: !newState });
+    const toggleVideo = async () => {
+        if (!localStream.current) return;
+
+        let videoTracks = localStream.current.getVideoTracks();
+
+        // If no video track exists (e.g., initial permission was audio-only), request camera
+        if (videoTracks.length === 0) {
+            try {
+                const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const newVideoTrack = cameraStream.getVideoTracks()[0];
+                localStream.current.addTrack(newVideoTrack);
+
+                // Add new video track to existing peer connections
+                Object.values(peerConnections.current).forEach(pc => {
+                    pc.addTrack(newVideoTrack, localStream.current);
+                });
+
+                videoTracks = [newVideoTrack];
+            } catch (err) {
+                console.error("Failed to enable camera device:", err);
+                alert("Could not access camera device.");
+                return;
             }
         }
+
+        const nextEnabledState = !videoTracks[0].enabled;
+        videoTracks[0].enabled = nextEnabledState;
+
+        const isNowOff = !nextEnabledState;
+        setIsVideoOff(isNowOff);
+
+        // Ensure video element srcObject is attached when turning video back ON
+        if (!isNowOff && localVideoRef.current) {
+            localVideoRef.current.srcObject = localStream.current;
+        }
+
+        socket.emit('toggle-camera', { channelId: activeChannel._id, userId: user.id, isVideoOff: isNowOff });
     };
 
     return (
@@ -230,8 +264,8 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
             }}>
                 {/* Local Video */}
                 <div className="video-card" style={{ backgroundColor: '#000', borderRadius: '8px', overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
-                    {isVideoOff ? (
-                        <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#2b2d31' }}>
+                    {isVideoOff && (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#2b2d31', position: 'absolute', top: 0, left: 0, zIndex: 2 }}>
                             <div style={{
                                 width: '100px',
                                 height: '100px',
@@ -249,16 +283,15 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
                                 {!user.avatar && (user.name?.charAt(0).toUpperCase())}
                             </div>
                         </div>
-                    ) : (
-                        <video
-                            ref={localVideoRef}
-                            autoPlay
-                            playsInline
-                            muted
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
-                        />
                     )}
-                    <div style={{ position: 'absolute', bottom: '12px', left: '12px', backgroundColor: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: '4px', color: 'white', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <video
+                        ref={localVideoRef}
+                        autoPlay
+                        playsInline
+                        muted
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)', display: isVideoOff ? 'none' : 'block' }}
+                    />
+                    <div style={{ position: 'absolute', bottom: '12px', left: '12px', backgroundColor: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: '4px', color: 'white', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', zIndex: 3 }}>
                         {isMuted && <span style={{ color: '#ed4245' }}>🔇</span>}
                         {user.name} (You)
                     </div>
@@ -267,8 +300,8 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
                 {/* Remote Videos */}
                 {Object.entries(peers).map(([peerId, peerData]) => (
                     <div key={peerId} className="video-card" style={{ backgroundColor: '#000', borderRadius: '8px', overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
-                        {peerData.isVideoOff ? (
-                            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#2b2d31' }}>
+                        {peerData.isVideoOff && (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#2b2d31', position: 'absolute', top: 0, left: 0, zIndex: 2 }}>
                                 <div style={{
                                     width: '100px',
                                     height: '100px',
@@ -286,15 +319,14 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
                                     {!peerData.avatar && (peerData.name?.charAt(0).toUpperCase())}
                                 </div>
                             </div>
-                        ) : (
-                            <video
-                                autoPlay
-                                playsInline
-                                ref={el => { if (el && peerData.stream) el.srcObject = peerData.stream }}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
                         )}
-                        <div style={{ position: 'absolute', bottom: '12px', left: '12px', backgroundColor: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: '4px', color: 'white', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <video
+                            autoPlay
+                            playsInline
+                            ref={el => { if (el && peerData.stream) el.srcObject = peerData.stream }}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: peerData.isVideoOff ? 'none' : 'block' }}
+                        />
+                        <div style={{ position: 'absolute', bottom: '12px', left: '12px', backgroundColor: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: '4px', color: 'white', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', zIndex: 3 }}>
                             {peerData.isMuted && <span style={{ color: '#ed4245' }}>🔇</span>}
                             {peerData.name}
                         </div>

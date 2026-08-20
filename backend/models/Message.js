@@ -4,7 +4,12 @@ import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema({
     content: {
         type: String,
-        required: true
+        default: ""
+    },
+    codeSnippet: {
+        code: { type: String },
+        language: { type: String, default: "javascript" },
+        filename: { type: String, default: "snippet" }
     },
     sender: {
         type: mongoose.Schema.Types.ObjectId,

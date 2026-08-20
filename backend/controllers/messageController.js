@@ -16,11 +16,12 @@ export const getMessages = async (req, res) => {
 // Send Message
 export const sendMessage = async (req, res) => {
     try {
-        const { content, channelId } = req.body;
+        const { content, channelId, codeSnippet } = req.body;
 
         const newMessage = await Message.create({
             sender: req.user._id,
-            content: content,
+            content: content || "",
+            codeSnippet: codeSnippet || null,
             channel: channelId
         });
 

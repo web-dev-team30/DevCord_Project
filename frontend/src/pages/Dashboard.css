@@ -635,3 +635,277 @@
 .action-btn:hover {
     background-color: #4752c4;
 }
+
+/* ---------- Code Snippet Sharing & IDE Cards ---------- */
+.code-snippet-trigger-btn {
+    background-color: #2b2d31;
+    color: #5865f2;
+    border: 1px solid #4f545c;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 2px 8px;
+    margin-right: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.code-snippet-trigger-btn:hover {
+    background-color: #5865f2;
+    color: white;
+    border-color: #5865f2;
+}
+
+.share-code-header-btn {
+    background-color: #2b2d31;
+    color: #dbdee1;
+    border: 1px solid #4f545c;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.share-code-header-btn code {
+    color: #5865f2;
+    font-family: monospace;
+}
+
+.share-code-header-btn:hover {
+    background-color: #35373c;
+    border-color: #5865f2;
+    color: white;
+}
+
+.code-block-container {
+    background-color: #1e1f22;
+    border: 1px solid #2b2d31;
+    border-radius: 6px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.code-block-header {
+    background-color: #2b2d31;
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #1e1f22;
+}
+
+.code-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.code-icon {
+    font-size: 14px;
+}
+
+.code-filename {
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #f2f3f5;
+}
+
+.code-lang-badge {
+    background-color: #383a40;
+    color: #949ba4;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.copy-code-btn {
+    background: transparent;
+    border: 1px solid #4f545c;
+    color: #b5bac1;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.copy-code-btn:hover {
+    background-color: #383a40;
+    color: white;
+}
+
+.copy-code-btn.copied {
+    border-color: #23a559;
+    color: #23a559;
+}
+
+.code-block-body {
+    display: flex;
+    background-color: #1e1f22;
+    overflow-x: auto;
+    font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.line-numbers {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 8px;
+    background-color: #18191c;
+    color: #4e5058;
+    user-select: none;
+    text-align: right;
+    border-right: 1px solid #2b2d31;
+    min-width: 36px;
+}
+
+.code-content {
+    margin: 0;
+    padding: 10px 12px;
+    flex: 1;
+    color: #e0e0e0;
+    overflow-x: auto;
+}
+
+.code-line {
+    white-space: pre;
+}
+
+/* Syntax Tokens */
+.token-comment {
+    color: #6a9955;
+    font-style: italic;
+}
+
+.token-string {
+    color: #ce9178;
+}
+
+.token-keyword {
+    color: #569cd6;
+    font-weight: 600;
+}
+
+.token-number {
+    color: #b5cea8;
+}
+
+.code-block-footer {
+    background-color: #2b2d31;
+    padding: 4px 12px;
+    text-align: center;
+    border-top: 1px solid #1e1f22;
+}
+
+.toggle-expand-btn {
+    background: transparent;
+    border: none;
+    color: #949ba4;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.toggle-expand-btn:hover {
+    color: #dbdee1;
+}
+
+/* Modal Code Snippet Styling */
+.code-modal-content {
+    width: 600px;
+    max-width: 90vw;
+}
+
+.code-modal-header {
+    text-align: left;
+    margin-bottom: 16px;
+}
+
+.code-modal-header h3 {
+    text-align: left;
+    margin-bottom: 4px;
+}
+
+.code-modal-header p {
+    text-align: left;
+    margin-bottom: 0;
+}
+
+.code-modal-row {
+    display: flex;
+    gap: 12px;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-2 {
+    flex: 2;
+}
+
+.code-lang-select {
+    width: 100%;
+    padding: 10px;
+    background-color: #1e1f22;
+    border: none;
+    border-radius: 4px;
+    color: #dbdee1;
+    font-size: 14px;
+    outline: none;
+}
+
+.code-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.line-count-tag {
+    font-size: 11px;
+    color: #949ba4;
+    font-weight: 600;
+    background-color: #1e1f22;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.code-input-textarea {
+    width: 100%;
+    background-color: #1e1f22;
+    border: 1px solid #383a40;
+    border-radius: 4px;
+    color: #dbdee1;
+    font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+    font-size: 13.5px;
+    padding: 12px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+}
+
+.code-input-textarea:focus {
+    border-color: #5865f2;
+}
+
+.share-code-btn {
+    background-color: #5865f2;
+}
+
+.share-code-btn:disabled {
+    background-color: #4f545c;
+    cursor: not-allowed;
+}

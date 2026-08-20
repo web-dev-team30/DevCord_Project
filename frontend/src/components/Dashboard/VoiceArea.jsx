@@ -15,7 +15,16 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
     useEffect(() => {
         const startMedia = async () => {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                // Try to get both first
+                let stream;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                } catch (e) {
+                    console.log("Video access failed, trying audio only...", e);
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    setIsVideoOff(true);
+                }
+
                 localStream.current = stream;
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
@@ -26,12 +35,13 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
                     userId: user.id,
                     userName: user.name,
                     avatar: user.avatar,
-                    isVideoOff: false,
+                    isVideoOff: !stream.getVideoTracks().length,
                     isMuted: false
                 });
 
             } catch (error) {
                 console.error("Error accessing media devices.", error);
+                alert("Could not access microphone. Please check your browser permissions.");
             }
         };
 
@@ -53,7 +63,10 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
             });
         });
 
-        socket.on('webrtc-offer', async ({ caller, callerName, callerAvatar, sdp }) => {
+        socket.on('webrtc-offer', async ({ target, caller, callerName, callerAvatar, sdp }) => {
+            if (target !== user.id) return; // Ignore if not for me
+
+            console.log('Received offer from', caller);
             const peerConnection = createPeerConnection(caller, callerName, callerAvatar);
             await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
 
@@ -67,14 +80,18 @@ const VoiceArea = ({ activeChannel, user, socket, onLeave }) => {
             });
         });
 
-        socket.on('webrtc-answer', async ({ responder, sdp }) => {
+        socket.on('webrtc-answer', async ({ target, responder, sdp }) => {
+            if (target !== user.id) return; // Ignore if not for me
+
             const peerConnection = peerConnections.current[responder];
             if (peerConnection) {
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
             }
         });
 
-        socket.on('webrtc-ice-candidate', async ({ sender, candidate }) => {
+        socket.on('webrtc-ice-candidate', async ({ target, sender, candidate }) => {
+            if (target !== user.id) return; // Ignore if not for me
+
             const peerConnection = peerConnections.current[sender];
             if (peerConnection && candidate) {
                 await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
